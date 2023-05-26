@@ -245,7 +245,7 @@ class gptMessageManage(object):
             'Content-Type': 'application/json',
             'Authorization': self.get_header(),
         }
-        print('发送的消息：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+        print('发送的消息stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
         json_data = {
             'model': self.model,
             'messages': self.msgs_msgdata_dict[str(msgs.source)].messages,
@@ -274,7 +274,7 @@ class gptMessageManage(object):
                 'Content-Type': 'application/json',
                 'Authorization': self.get_header(),
             }
-            print('发送的消息：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+            print('发送的消息voice：',self.msgs_msgdata_dict[str(msgs.source)].messages)
 
             json_data = {
                 'model': self.model,
@@ -314,7 +314,7 @@ class gptMessageManage(object):
             'Content-Type': 'application/json',
             'Authorization': self.get_header(),
         }
-        print('发送的消息：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+        print('发送的消息voice_stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
 
         json_data = {
             'model': self.model,
@@ -353,6 +353,7 @@ class gptMessageManage(object):
         从AZURE获取文本转语音的结果
         '''
         try:
+            print('开始语言转换')
             speech_config = speechsdk.SpeechConfig(subscription=self.configs['azure']['subscription'], region=self.configs['azure']['region'])
             speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
             if self.have_chinese(texts):
