@@ -353,7 +353,7 @@ class gptMessageManage(object):
         从AZURE获取文本转语音的结果
         '''
         try:
-            print('开始语言转换')
+            print('从AZURE获取文本转语音的结果')
             speech_config = speechsdk.SpeechConfig(subscription=self.configs['azure']['subscription'], region=self.configs['azure']['region'])
             speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
             if self.have_chinese(texts):
@@ -362,6 +362,7 @@ class gptMessageManage(object):
             else:
                 # speech_config.speech_synthesis_voice_name ="en-US-GuyNeural"
                 speech_config.speech_synthesis_voice_name =self.configs['azure']['en_model']
+            print('保存文件')
             audio_config = speechsdk.audio.AudioOutputConfig(filename=f"voice/{msgsource[-5:]+msgid[-5:]}.mp3")
             speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
             rr = speech_synthesizer.speak_text(f"{texts}")
@@ -376,6 +377,7 @@ class gptMessageManage(object):
     def upload_wechat_voice(self,msgsource,msgid):
         '''上传语音素材到微信'''
         try:
+            print('上传语音素材到微信')
             with open(f"voice/{msgsource[-5:]+msgid[-5:]}.mp3","rb") as f:
                 res = self.client.material.add('voice',f)
                 media_id = res['media_id']
