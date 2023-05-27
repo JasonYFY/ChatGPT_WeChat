@@ -50,7 +50,7 @@ class gptSessionManage(object):
         '''
         初始化会话
         '''
-        self.messages = [{"role": "system", "content": "我是ChatGPT, 一个由OpenAI训练的大型语言模型, 我旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流。"}]
+        self.messages = [{"role": "system", "content": "你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流，你的回答尽量不要超过400个字"}]
     
     def pop_last_message(self):
         try:
