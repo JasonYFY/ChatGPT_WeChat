@@ -472,4 +472,6 @@ class gptMessageManage(object):
             return {'code':0,'content':full_reply_content}
         except Exception as e:
             print(e)
-            return {'code':1,'content':'请求超时，
+            return {'code':1,'content':'请求超时，请稍后再试！'}
+
+
