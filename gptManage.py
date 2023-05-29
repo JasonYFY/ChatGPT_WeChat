@@ -96,7 +96,7 @@ class gptMessageManage(object):
         # 判断是否返回分割列表里面的内容
         if msg_content=='继续' and len(self.msgs_msg_cut_dict.get(str(msgs.source),[]))>0:
             if len(self.msgs_msg_cut_dict[str(msgs.source)])>1:
-                return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n 还有剩余结果，请回复【继续】查看！'
+                return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n (还有剩余结果，请回复【继续】查看！)'
             else:
                 return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)
         
@@ -164,7 +164,7 @@ class gptMessageManage(object):
                     else:
                         cutmsgs.append(retunsMsg[i*self.rsize:i*self.rsize+self.rsize])
                 self.msgs_msg_cut_dict[str(msgs.source)] = cutmsgs    
-                return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n 还有剩余结果，请回复【继续】查看！'
+                return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n (还有剩余结果，请回复【继续】查看！)'
             return retunsMsg
         else:
             print('当前的对话没有回复',curtime,msg_content)
