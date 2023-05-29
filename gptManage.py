@@ -19,7 +19,7 @@ class gptSessionManage(object):
         '''
         初始化
         '''
-        self.messages = [{"role": "system", "content": "我是ChatGPT, 一个由OpenAI训练的大型语言模型, 我旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流。"}]
+        self.messages = [{"role": "system", "content": "你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流，你的回答尽量不要超过400个字"}]
         self.sizeLim = save_history
         self.last_q_time = time.time()
         self.last_msg = ''
@@ -142,10 +142,10 @@ class gptMessageManage(object):
             res = self.rec_get_returns_pending(msgs)
 
 
-        print('记录时间：',self.msgs_time_dict.get(str(msgs.id),''),'当前时间',curtime)
+        # print('记录时间：',self.msgs_time_dict.get(str(msgs.id),''),'当前时间',curtime)
         # 判断当前请求是否是最新的请求，是：返回消息，否：返回空
         if curtime == self.msgs_time_dict.get(str(msgs.id),''):
-            print('这是结果',self.msgs_returns_dict[str(msgs.id)])
+            print('回复结果：',self.msgs_returns_dict[str(msgs.id)])
             retunsMsg = self.msgs_returns_dict.get(str(msgs.id),'tt')
             # 清理缓存
             t = threading.Thread(target=self.del_cache)
@@ -472,6 +472,4 @@ class gptMessageManage(object):
             return {'code':0,'content':full_reply_content}
         except Exception as e:
             print(e)
-            return {'code':1,'content':'请求超时，请稍后再试！'}
-        
-        
+            return {'code':1,'content':'请求超时，
