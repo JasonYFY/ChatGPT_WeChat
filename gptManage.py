@@ -460,7 +460,7 @@ class gptMessageManage(object):
                     if chunk_time>=timeout:
                         print('请求中断')
                         full_reply_content = ''.join(collected_messages)
-                        return {'code':0,'content':full_reply_content+'\n 还有剩余结果，请回复【继续】查看！'}
+                        return {'code':0,'content':full_reply_content+'\n (还有剩余结果，请回复【继续】查看！)'}
                         break
                     chunk = response.__next__()
                     collected_chunks.append(chunk)  # save the event response
