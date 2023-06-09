@@ -7,7 +7,7 @@ import logging
 import azure.cognitiveservices.speech as speechsdk
 from wechatpy import WeChatClient
 import threading
-import os 
+import os
 from os import listdir
 from sseclient import SSEClient
 
@@ -23,7 +23,7 @@ class gptSessionManage(object):
         self.sizeLim = save_history
         self.last_q_time = time.time()
         self.last_msg = ''
-    
+
     def add_send_message(self,msg):
         '''
         会话管理, 拼接回复模板
@@ -45,19 +45,19 @@ class gptSessionManage(object):
         添加openai回复消息内容
         '''
         self.messages.append({"role": "assistant", "content": f"{msg}"})
-    
+
     def end_message(self):
         '''
         初始化会话
         '''
         self.messages = [{"role": "system", "content": "你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流，你的回答尽量不要超过400个字"}]
-    
+
     def pop_last_message(self):
         try:
             self.messages.pop()
         except Exception as e:
             print(e)
-        
+
 class gptMessageManage(object):
     '''
     消息管理器，接受用户消息，回复用户消息
@@ -79,15 +79,15 @@ class gptMessageManage(object):
         self.msgs_returns_dict = dict()# 记录每个msgID的返回值
         self.msgs_msgdata_dict = dict()# 记录每个发送者的会话管理器gptSessionManage
         self.msgs_msg_cut_dict = dict()# 记录每个msgID超过回复长度限制的分割列表
-        
+
         self.user_msg_timeSpan_dict = dict() # 记录每个发送消息者的时间消息时间间隔
         self.user_msg_timePoint_dict = dict() # 记录每个发送消息者的上次时间点
-        
+
         self.media_id_list = [] #用于记录上传到微信素材的media_id
-        
+
         self.last_clean_time = time.time()
-        
-        
+
+
     def get_response(self,msgs,curtime,msg_content):
         '''
         获取每条msg，回复消息
@@ -99,7 +99,7 @@ class gptMessageManage(object):
                 return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n (还有剩余结果，请回复【继续】查看！)'
             else:
                 return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)
-        
+
         # 获取消息属性
         users_obj = self.msgs_msgdata_dict.get(str(msgs.source),'')
         # 判断是否新用户
@@ -113,12 +113,12 @@ class gptMessageManage(object):
             self.msgs_list[str(msgs.id)]=[]
             self.msgs_list[str(msgs.id)].append(msgs)
             # 将当前时间设定为消息的最新时间
-            
+
             # 修改消息的状态为pending
             self.msgs_status_dict[str(msgs.id)] = 'pending'
             # 加入消息到消息管理器中
             self.msgs_msgdata_dict[str(msgs.source)].add_send_message(msg_content)
-            
+
             # 获取用户消息的时间间隔，防止用户发送消息过于频繁：
             user_sendTimeSpan = self.user_msg_timeSpan_dict.get(str(msgs.source),[])
             user_sendTimePoint = self.user_msg_timePoint_dict.get(str(msgs.source),curtime-15)
@@ -134,7 +134,7 @@ class gptMessageManage(object):
                 else:
                     self.user_msg_timePoint_dict[str(msgs.source)] = curtime
                     self.user_msg_timeSpan_dict[str(msgs.source)] = [user_sendTimeSpan[-2],user_sendTimeSpan[-1],user_curTimeUse]
-            
+
             # 等候消息返回
             res = self.rec_get_returns_first(msgs)
         # 为二次请求消息
@@ -163,7 +163,7 @@ class gptMessageManage(object):
                         cutmsgs.append(retunsMsg[i*self.rsize:])
                     else:
                         cutmsgs.append(retunsMsg[i*self.rsize:i*self.rsize+self.rsize])
-                self.msgs_msg_cut_dict[str(msgs.source)] = cutmsgs    
+                self.msgs_msg_cut_dict[str(msgs.source)] = cutmsgs
                 return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n (还有剩余结果，请回复【继续】查看！)'
             return retunsMsg
         else:
@@ -171,7 +171,7 @@ class gptMessageManage(object):
             # self.del_cache()
             time.sleep(10)
             return ''
-    
+
     def rec_get_returns_pending(self,msgs):
         '''
         pending状态的消息等候
@@ -179,8 +179,8 @@ class gptMessageManage(object):
         while self.msgs_status_dict.get(str(msgs.id),'') == 'pending':
             time.sleep(0.1)
         return 'success'
-            
-    
+
+
     def rec_get_returns_first(self,msgs):
         '''
         首次消息开始处理
@@ -199,13 +199,13 @@ class gptMessageManage(object):
                     self.msgs_returns_dict[str(mymsg.id)]=self.send_request_voice(mymsg)
         self.msgs_status_dict[str(mymsg.id)] = 'haveResponse'
         return 'success'
-            
+
     def get_header(self):
         '''
         随机获取token，可以设置多个token，避免单个token超过请求限制。
         '''
         return random.choice(self.tokens)
-    
+
     def send_request(self,msgs):
         '''text消息处理'''
         try:
@@ -237,10 +237,10 @@ class gptMessageManage(object):
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
             return '请求超时，请稍后再试！\n【近期官方接口响应变慢，若持续出现请求超时，还请换个时间再来😅~】'
             # return '请求超时，请稍后再试！'
-            
+
     def send_request_stream(self,msgs):
         '''text消息处理_流式处理'''
-        
+
         headers = {
             'Content-Type': 'application/json',
             'Authorization': self.get_header(),
@@ -266,7 +266,7 @@ class gptMessageManage(object):
         else:
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
             return '出错了，请稍后再试！'
-        
+
     def send_request_voice(self,msgs):
         '''voice消息处理'''
         try:
@@ -307,7 +307,7 @@ class gptMessageManage(object):
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
             print(e)
             return '请求超时，请稍后再试！'
-        
+
     def send_request_voice_stream(self,msgs):
         '''voice消息处理'''
         headers = {
@@ -347,7 +347,7 @@ class gptMessageManage(object):
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
             print(response_parse)
             return '出错了，请稍后再试！'
-    
+
     def get_voice_from_azure(self,texts,msgsource,msgid):
         '''
         从AZURE获取文本转语音的结果
@@ -373,7 +373,7 @@ class gptMessageManage(object):
         except Exception as e:
             print(e)
             return False
-    
+
     def upload_wechat_voice(self,msgsource,msgid):
         '''上传语音素材到微信'''
         try:
@@ -385,15 +385,15 @@ class gptMessageManage(object):
             return media_id
         except Exception as e:
             print(e)
-            return 
-    
+            return
+
     def have_chinese(self,strs):
         '''判断是否有中文'''
         for _char in strs[:8]:
             if '\u4e00' <= _char <= '\u9fa5':
                 return True
         return False
-    
+
     def del_uploaded_wechat_voice(self,mediaId):
         '''删除上传的语音素材'''
         try:
@@ -402,8 +402,8 @@ class gptMessageManage(object):
         except Exception as e:
             print(e)
             return 1
-        
-        
+
+
     def del_cache(self):
         '''
         清除缓存
@@ -422,7 +422,7 @@ class gptMessageManage(object):
                 self.msgs_list.pop(key,'')
             self.last_clean_time = time.time()
             my_path = 'voice/'
-            
+
             for file_name in listdir(my_path):
                 try:
                     os.remove(my_path + file_name)
@@ -432,8 +432,8 @@ class gptMessageManage(object):
             for mid in self.media_id_list:
                 self.del_uploaded_wechat_voice(mid)
             self.media_id_list = []
-        return 
-    
+        return
+
     def request_stream(self, headers,json_data,timeout):
         '''
         使用流式回复
@@ -445,9 +445,9 @@ class gptMessageManage(object):
         try:
             collected_chunks = []
             collected_messages = []
-            
+
             myrequest = requests.post('https://api.openai.com/v1/chat/completions', stream=True, headers=headers, json=json_data,timeout=timeout-0.8)
-            print('request_stream的请求信息：',json_data)
+            print('request_stream的请求信息：',str(json_data))
             client = SSEClient(myrequest)
             response = client.events()
             # print('beginStream',type(response),time.time() - start_time)
