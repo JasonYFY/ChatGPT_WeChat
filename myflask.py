@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 导入模块
 import hashlib
 from flask import Flask, request, make_response

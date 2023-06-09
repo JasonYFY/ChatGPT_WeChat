@@ -447,10 +447,10 @@ class gptMessageManage(object):
             collected_messages = []
             
             myrequest = requests.post('https://api.openai.com/v1/chat/completions', stream=True, headers=headers, json=json_data,timeout=timeout-0.8)
-            print(json_data)
+            print('request_stream的请求信息：'+json_data)
             client = SSEClient(myrequest)
             response = client.events()
-            print('beginStream',type(response),time.time() - start_time)
+            # print('beginStream',type(response),time.time() - start_time)
             aa = response.__next__()
 
             while True:
