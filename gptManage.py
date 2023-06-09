@@ -10,6 +10,7 @@ import threading
 import os
 from os import listdir
 from sseclient import SSEClient
+from common.log import logger
 
 class gptSessionManage(object):
     '''
@@ -145,7 +146,7 @@ class gptMessageManage(object):
         # print('记录时间：',self.msgs_time_dict.get(str(msgs.id),''),'当前时间',curtime)
         # 判断当前请求是否是最新的请求，是：返回消息，否：返回空
         if curtime == self.msgs_time_dict.get(str(msgs.id),''):
-            print('回复结果：',self.msgs_returns_dict[str(msgs.id)])
+            logger.info('回复结果：',self.msgs_returns_dict[str(msgs.id)])
             retunsMsg = self.msgs_returns_dict.get(str(msgs.id),'tt')
             # 清理缓存
             t = threading.Thread(target=self.del_cache)
@@ -167,7 +168,7 @@ class gptMessageManage(object):
                 return self.msgs_msg_cut_dict[str(msgs.source)].pop(0)+'\n (还有剩余结果，请回复【继续】查看！)'
             return retunsMsg
         else:
-            print('当前的对话没有回复',curtime,msg_content)
+            logger.info('当前的对话没有回复',curtime,msg_content)
             # self.del_cache()
             time.sleep(10)
             return ''
@@ -213,7 +214,7 @@ class gptMessageManage(object):
                 'Content-Type': 'application/json',
                 'Authorization': self.get_header(),
             }
-            print('发送的消息：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+            logger.info('发送的消息：',self.msgs_msgdata_dict[str(msgs.source)].messages)
 
             json_data = {
                 'model': self.model,
@@ -224,16 +225,16 @@ class gptMessageManage(object):
 
             response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=json_data,timeout=14.2)
             response_parse = json.loads(response.text)
-            print(response_parse)
+            logger.info(response_parse)
             if 'error' in response_parse:
                 self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
-                print(response_parse)
+                logger.info(response_parse)
                 return '出错了，请稍后再试！'
             else:
                 self.msgs_msgdata_dict[str(msgs.source)].add_res_message(response_parse['choices'][0]['message']['content'])
                 return response_parse['choices'][0]['message']['content']
         except Exception as e:
-            print(e)
+            logger.info(e)
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
             return '请求超时，请稍后再试！\n【近期官方接口响应变慢，若持续出现请求超时，还请换个时间再来😅~】'
             # return '请求超时，请稍后再试！'
@@ -245,7 +246,7 @@ class gptMessageManage(object):
             'Content-Type': 'application/json',
             'Authorization': self.get_header(),
         }
-        print('发送的消息stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+        logger.info('发送的消息stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
         json_data = {
             'model': self.model,
             'messages': self.msgs_msgdata_dict[str(msgs.source)].messages,
@@ -274,7 +275,7 @@ class gptMessageManage(object):
                 'Content-Type': 'application/json',
                 'Authorization': self.get_header(),
             }
-            print('发送的消息voice：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+            logger.info('发送的消息voice：',self.msgs_msgdata_dict[str(msgs.source)].messages)
 
             json_data = {
                 'model': self.model,
@@ -285,10 +286,10 @@ class gptMessageManage(object):
 
             response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=json_data,timeout=9)
             response_parse = json.loads(response.text)
-            print(response_parse)
+            logger.info(response_parse)
             if 'error' in response_parse:
                 self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
-                print(response_parse)
+                logger.error(response_parse)
                 return '出错了，请稍后再试！'
             else:
                 rtext = response_parse['choices'][0]['message']['content']
@@ -314,7 +315,7 @@ class gptMessageManage(object):
             'Content-Type': 'application/json',
             'Authorization': self.get_header(),
         }
-        print('发送的消息voice_stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
+        logger.info('发送的消息voice_stream：',self.msgs_msgdata_dict[str(msgs.source)].messages)
 
         json_data = {
             'model': self.model,
@@ -341,11 +342,11 @@ class gptMessageManage(object):
                 return rtext
         elif code==1:
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
-            print(e)
+            logger.info(e)
             return '请求超时，请稍后再试！\n【近期官方接口响应变慢，若持续出现请求超时，还请换个时间再来😅~】'
         else:
             self.msgs_msgdata_dict[str(msgs.source)].pop_last_message()
-            print(response_parse)
+            logger.info(response_parse)
             return '出错了，请稍后再试！'
 
     def get_voice_from_azure(self,texts,msgsource,msgid):
@@ -353,7 +354,7 @@ class gptMessageManage(object):
         从AZURE获取文本转语音的结果
         '''
         try:
-            print('从AZURE获取文本转语音的结果')
+            logger.info('从AZURE获取文本转语音的结果')
             speech_config = speechsdk.SpeechConfig(subscription=self.configs['azure']['subscription'], region=self.configs['azure']['region'])
             speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
             if self.have_chinese(texts):
@@ -362,7 +363,7 @@ class gptMessageManage(object):
             else:
                 # speech_config.speech_synthesis_voice_name ="en-US-GuyNeural"
                 speech_config.speech_synthesis_voice_name =self.configs['azure']['en_model']
-            print('保存文件')
+            logger.info('保存文件')
             audio_config = speechsdk.audio.AudioOutputConfig(filename=f"voice/{msgsource[-5:]+msgid[-5:]}.mp3")
             speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
             rr = speech_synthesizer.speak_text(f"{texts}")
@@ -371,20 +372,20 @@ class gptMessageManage(object):
             else:
                 return False
         except Exception as e:
-            print(e)
+            logger.info(e)
             return False
 
     def upload_wechat_voice(self,msgsource,msgid):
         '''上传语音素材到微信'''
         try:
-            print('上传语音素材到微信')
+            logger.info('上传语音素材到微信')
             with open(f"voice/{msgsource[-5:]+msgid[-5:]}.mp3","rb") as f:
                 res = self.client.material.add('voice',f)
                 media_id = res['media_id']
                 self.media_id_list.append(media_id)
             return media_id
         except Exception as e:
-            print(e)
+            logger.info(e)
             return
 
     def have_chinese(self,strs):
@@ -400,7 +401,7 @@ class gptMessageManage(object):
             self.client.material.delete(mediaId)
             return 1
         except Exception as e:
-            print(e)
+            logger.info(e)
             return 1
 
 
@@ -427,7 +428,7 @@ class gptMessageManage(object):
                 try:
                     os.remove(my_path + file_name)
                 except Exception:
-                    print('删除失败')
+                    logger.info('删除失败')
             # 删除media_id：
             for mid in self.media_id_list:
                 self.del_uploaded_wechat_voice(mid)
@@ -447,10 +448,10 @@ class gptMessageManage(object):
             collected_messages = []
 
             myrequest = requests.post('https://api.openai.com/v1/chat/completions', stream=True, headers=headers, json=json_data,timeout=timeout-0.8)
-            print('request_stream的请求信息：',str(json_data))
+            logger.info('request_stream的请求信息：',str(json_data))
             client = SSEClient(myrequest)
             response = client.events()
-            # print('beginStream',type(response),time.time() - start_time)
+            # logger.info('beginStream',type(response),time.time() - start_time)
             aa = response.__next__()
 
             while True:
@@ -458,7 +459,7 @@ class gptMessageManage(object):
                     # calculate the time delay of the chunk
                     chunk_time = time.time() - start_time
                     if chunk_time>=timeout:
-                        print('请求中断')
+                        logger.info('请求中断')
                         full_reply_content = ''.join(collected_messages)
                         return {'code':0,'content':full_reply_content+'\n (还有剩余结果，请回复【继续】查看！)'}
                         break
@@ -471,7 +472,7 @@ class gptMessageManage(object):
             full_reply_content = ''.join(collected_messages)
             return {'code':0,'content':full_reply_content}
         except Exception as e:
-            print(e)
+            logger.info(e)
             return {'code':1,'content':'请求超时，请稍后再试！'}
 
 
