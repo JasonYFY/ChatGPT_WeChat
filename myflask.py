@@ -108,6 +108,13 @@ def getAccessToken():
     logger.info('获取的accessToken：%s',access_token)
     return 'success'
 
+@app.route('/refreshToken/', methods=['POST'])
+def refreshToken():
+    req = request.get_json()  # 获取JSON数据
+    refreshToken = req.get('refresh_token')  # 获取参数refresh_token
+    access_token = Auth0.refresh(refreshToken)
+    logger.info('刷新的accessToken：%s',access_token)
+    return 'success'
 
 if __name__ == '__main__':
     app.run( host = '0.0.0.0')

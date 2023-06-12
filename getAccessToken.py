@@ -8,7 +8,10 @@ from urllib.parse import urlparse, parse_qs
 
 import requests
 from certifi import where
+from common.log import logger
 
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) ' \
+                 'Chrome/109.0.0.0 Safari/537.36'
 
 class Auth0:
     def __init__(self, email: str, password: str, proxy: str = None, use_cache: bool = True):
@@ -27,8 +30,7 @@ class Auth0:
         }
         self.access_token = None
         self.expires = None
-        self.user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-                          'Chrome/109.0.0.0 Safari/537.36'
+        self.user_agent = USER_AGENT
         self.api_prefix = getenv('CHATGPT_API_PREFIX', 'https://ai.fakeopen.com')
 
     @staticmethod
@@ -44,6 +46,41 @@ class Auth0:
             raise Exception('invalid email or password.')
 
         return self.__part_two() if login_local else self.get_access_token_proxy()
+
+    @staticmethod
+    def refresh(token: str) -> str:
+
+        if not token:
+            raise Exception('invalid refresh token.')
+
+        url = 'https://auth0.openai.com/oauth/token'
+        headers = {
+            'User-Agent': USER_AGENT,
+        }
+        data = {
+            'redirect_uri': 'com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback',
+            'grant_type': 'refresh_token',
+            'client_id': 'pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh',
+            'refresh_token': token,
+        }
+        refresh_req_kwargs = {
+            'verify': where(),
+            'timeout': 100,
+        }
+        resp = requests.Session().post(url, headers=headers, json=data, allow_redirects=False, **refresh_req_kwargs)
+        logger.info('刷新-响应resp：%s', resp)
+        if resp.status_code == 200:
+            json = resp.json()
+            if 'access_token' not in json:
+                raise Exception('Get access token failed, maybe you need a proxy.')
+
+            self.access_token = json['access_token']
+            expires_at = dt.utcnow() + datetime.timedelta(seconds=json['expires_in']) - datetime.timedelta(minutes=5)
+            self.expires = expires_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            return self.access_token
+        else:
+            raise Exception(resp.text)
+
 
     def __part_two(self) -> str:
         code_challenge = 'w6n3Ix420Xhhu-Q5-mOOEyuPZmAsJHUbBpO8Ub7xBCY'
