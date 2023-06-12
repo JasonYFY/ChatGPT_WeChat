@@ -10,8 +10,10 @@ import time
 import os
 import yaml
 # 导入自定义类
+from getAccessToken import Auth0
 from whiteIPManage import whiteIP
 from gptManage import gptSessionManage,gptMessageManage
+from common.log import logger
 
 ##############################读取配置##########################
 with open('config/config.yml', 'r') as f:
@@ -96,6 +98,15 @@ def wechat():
             reply = create_reply(rtext, message=msg)#创建消息
             return reply.render()#回复消息
         return ''
+
+@app.route('/getAccessToken/', methods=['POST'])
+def getAccessToken():
+    req = request.get_json()  # 获取JSON数据
+    username = req.get('username')  # 获取参数username
+    password = req.get('password')  # 获取参数password
+    access_token = Auth0(username, password).auth(True)
+    logger.info('获取的accessToken：%s',access_token)
+    return 'success'
 
 
 if __name__ == '__main__':
