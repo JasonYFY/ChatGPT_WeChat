@@ -68,10 +68,10 @@ class Auth0:
             'timeout': 100,
         }
         resp = requests.Session().post(url, headers=headers, json=data, allow_redirects=False, **refresh_req_kwargs)
-        logger.info('刷新-响应resp.text：%s', resp.text)
+        #logger.info('刷新-响应resp.text：%s', resp.text)
         if resp.status_code == 200:
             json = resp.json()
-            logger.info('刷新-响应json：%s', json)
+            #logger.info('刷新-响应json：%s', json)
             if 'access_token' not in json:
                 raise Exception('Get access token failed, maybe you need a proxy.')
             access_token = json['access_token']
