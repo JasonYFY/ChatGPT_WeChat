@@ -201,6 +201,7 @@ class Auth0:
 
         if resp.status_code == 200:
             json = resp.json()
+            logger.info('获取的token等信息：%s',json)
             if 'access_token' not in json:
                 raise Exception('Get access token failed, maybe you need a proxy.')
 
