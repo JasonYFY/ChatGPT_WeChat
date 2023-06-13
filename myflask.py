@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 # 导入模块
 import hashlib
+import time
+
+import yaml
 from flask import Flask, request, make_response
 from flask import abort
 from wechatpy import parse_message, create_reply, WeChatClient
 from wechatpy.replies import VoiceReply
-import wechatpy
-import time
-import os
-import yaml
+
+from common.log import logger
 # 导入自定义类
 from getAccessToken import Auth0
+from gptManage import gptMessageManage
 from whiteIPManage import whiteIP
-from gptManage import gptSessionManage,gptMessageManage
-from common.log import logger
 
 ##############################读取配置##########################
 with open('config/config.yml', 'r') as f:
@@ -104,17 +104,27 @@ def getAccessToken():
     req = request.get_json()  # 获取JSON数据
     username = req.get('username')  # 获取参数username
     password = req.get('password')  # 获取参数password
-    access_token = Auth0(username, password).auth(True)
-    logger.info('获取的accessToken：%s',access_token)
-    return 'success'
+    try:
+        access_token = Auth0(username, password).auth(True)
+        logger.info('获取的accessToken：%s', access_token)
+        return {'status': 'success', 'data': access_token}
+    except Exception as e:
+        message = str(e)
+        logger.error('getAccessToken接口报错：%s', e)
+    return {'status': 'fail', 'message': message}
 
 @app.route('/refreshToken/', methods=['POST'])
 def refreshToken():
     req = request.get_json()  # 获取JSON数据
     refreshToken = req.get('refresh_token')  # 获取参数refresh_token
-    access_token = Auth0.refresh(refreshToken)
-    logger.info('刷新的accessToken：%s',access_token)
-    return 'success'
+    try:
+        access_token = Auth0.refresh(refreshToken)
+        logger.info('刷新的accessToken：%s', access_token)
+        return {'status': 'success', 'data': access_token}
+    except Exception as e:
+        message = str(e)
+        logger.error('refreshToken接口报错：%s', e)
+    return {'status': 'fail', 'message': message}
 
 if __name__ == '__main__':
     app.run( host = '0.0.0.0')
