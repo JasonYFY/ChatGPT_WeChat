@@ -16,7 +16,7 @@ class geminiAi:
     apiKey = configs['bardAi']['api_key']
 
     genai.configure(api_key=apiKey)
-    model = genai.GenerativeModel('gemini-1.0-pro-latest')
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
 
     @staticmethod
