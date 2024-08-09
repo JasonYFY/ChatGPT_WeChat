@@ -2,7 +2,7 @@ import yaml
 from cachetools import TTLCache
 from commonUtils.log import logger
 import google.generativeai as genai
-
+import PIL.Image
 
 
 
@@ -32,7 +32,7 @@ class geminiAi:
         if imageFileName:
             image_path = geminiAi.imagePath + imageFileName
             logger.info('读取图片路径：{}'.format(image_path))
-            image = open(image_path, 'rb').read()  # (jpeg, png, webp) are supported.
+            image = PIL.Image.open(image_path)  # (jpeg, png, webp) are supported.
             # messages = gemini.history
             # messages.append({'role': 'user','parts': [content]})
             res = gemini.send_message([content,image])
