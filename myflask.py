@@ -165,7 +165,6 @@ def getAnswerOfGemini():
     imageFileName = req.get('imageFileName')
     def stream_response():
         try:
-            yield "data: " + json.dumps({'status': 'processing'}) + "\n\n"
             for chunk in geminiAi.getAnswerStream(content, conversationId, imageFileName):
                 yield "data: " + json.dumps({'status': 'streaming', 'msg': chunk}) + "\n\n"
             yield "data: " + json.dumps({'status': 'success', 'msg': chunk}) + "\n\n"  # 发送最终答案
