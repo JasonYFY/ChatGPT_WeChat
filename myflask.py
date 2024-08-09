@@ -182,12 +182,6 @@ def singInOfTgHelp():
     signIn.singInOfTgHelp(content)
     return {'status': 'success'}
 
-@app.route('/singInOfYiLi/', methods=['POST'])
-def singInOfYiLi():
-    req = request.get_json()  # 获取JSON数据
-#     content = req.get('content')
-    signIn.singInOfYiLi()
-    return {'status': 'success'}
 
 
 if __name__ == '__main__':
