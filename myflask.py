@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # 导入模块
 import hashlib
+import json
 import time
 
 import yaml
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response,Response
 from flask import abort
 from wechatpy import parse_message, create_reply, WeChatClient
 from wechatpy.replies import VoiceReply
@@ -155,6 +156,25 @@ def getAnswerOfBard():
         message = str(e)
         logger.error('getAnswerOfBard接口报错：%s', e)
     return {'status': 'fail', 'msg': message}
+
+@app.route('/getAnswerOfGemini/', methods=['POST'])
+def getAnswerOfGemini():
+    req = request.get_json()  # 获取JSON数据
+    content = req.get('content')
+    conversationId = req.get('conversationId')
+    imageFileName = req.get('imageFileName')
+    def stream_response():
+        try:
+            yield "data: " + json.dumps({'status': 'processing'}) + "\n\n"
+            for chunk in geminiAi.getAnswerStream(content, conversationId, imageFileName):
+                yield "data: " + json.dumps({'status': 'streaming', 'msg': chunk}) + "\n\n"
+            yield "data: " + json.dumps({'status': 'success', 'msg': chunk}) + "\n\n"  # 发送最终答案
+        except Exception as e:
+            message = str(e)
+            logger.error('getAnswerOfBard接口报错：%s', e)
+            yield "data: " + json.dumps({'status': 'fail', 'msg': message}) + "\n\n"
+
+    return Response(stream_response(), mimetype='text/event-stream')
 
 @app.route('/singInOfTgHelp/', methods=['POST'])
 def singInOfTgHelp():
