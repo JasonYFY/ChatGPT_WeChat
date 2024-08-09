@@ -33,7 +33,9 @@ class geminiAi:
             image_path = geminiAi.imagePath + imageFileName
             logger.info('读取图片路径：{}'.format(image_path))
             image = open(image_path, 'rb').read()  # (jpeg, png, webp) are supported.
-            res = gemini.generate_content([content,image])
+            # messages = gemini.history
+            # messages.append({'role': 'user','parts': [content]})
+            res = gemini.send_message([content,image])
         else:
             res = gemini.send_message(content)
 
