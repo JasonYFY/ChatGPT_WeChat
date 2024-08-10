@@ -11,16 +11,16 @@ import cv2
 import logging
 import os
 from commonUtils.log import logger
-# app = FastAPI()
+app = FastAPI()
 
 # 将日志级别设置为 INFO 或更高
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class LoginRequest(BaseModel):
-    usernum: str
-    passwd: str
+    username: str
+    password: str
 
 
 def printf(message):
@@ -157,7 +157,7 @@ async def get_jd_ck(usernum, passwd, headless=True):
                             pt_pin = cookie['value']
                     await browser.close()
                     printf(f"{usernum} 登录成功，获取到CK: pt_key={pt_key};pt_pin={pt_pin};")
-                    return {"status": "true", "msg": f'pt_key={pt_key};pt_pin={pt_pin};'}
+                    return {"status": "true", "data": f'pt_key={pt_key};pt_pin={pt_pin};'}
             except Exception as e:
                 return await handle_error(f"{usernum} 登录发生错误", browser, e)
 
@@ -216,7 +216,7 @@ async def handle_error(error_message, browser, e=None):
         logger.error(error_message)
     if browser:
         await browser.close()
-    return {"status": "false", "msg": error_message}
+    return {"status": "fail", "msg": error_message}
 
 
 async def click_and_wait(page, selector, wait_time=2000):
@@ -235,10 +235,10 @@ def cleanup_files(*filenames):
             os.remove(filename)
 
 
-# @app.post("/login")
+@app.post("/getJingdongToken")
 async def login(request: LoginRequest):
     try:
-        response = await get_jd_ck(request.usernum, request.passwd, headless=False)
+        response = await get_jd_ck(request.username, request.password, headless=False)
         return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"{request.usernum}账密登录发生异常:{e}")
@@ -256,7 +256,7 @@ def login_get_jd_ck(usernum, passwd):
     return response
 
 
-# if __name__ == '__main__':
-#     import uvicorn
-#
-#     uvicorn.run(app, host="127.0.0.1", port=8000)
+if __name__ == '__main__':
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

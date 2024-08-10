@@ -21,3 +21,5 @@ paddleocr
 fastapi
 pyppeteer
 google-generativeai
+Pillow
+uvicorn
