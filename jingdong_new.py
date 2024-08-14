@@ -8,14 +8,10 @@ from pyppeteer import launch
 from urllib.request import urlretrieve
 from PIL import Image
 import cv2
-import logging
 import os
 from commonUtils.log import logger
 app = FastAPI()
 
-# 将日志级别设置为 INFO 或更高
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class LoginRequest(BaseModel):
@@ -31,11 +27,31 @@ def printf(message):
 async def get_jd_ck(usernum, passwd, headless=True):
     async def typeuser(page, usernum, passwd):
         logger.info("输入用户名和密码")
-        await click_and_wait(page, '.J_ping.planBLogin')
+        zmBtn = '.J_ping.planBLogin'
+        element = await page.querySelector(zmBtn)
+        # 如果元素存在，则点击
+        if element:
+            await click_and_wait(page, zmBtn)
         await wait_and_type(page, '#username', usernum, (60, 121))
         await wait_and_type(page, '#pwd', passwd, (100, 151))
         await page.waitFor(random.randint(100, 2000))
-        await click_and_wait(page, '.policy_tip-checkbox')
+
+        fxkBtm = '.policy_tip-checkbox'
+        checkbox = await page.querySelector(fxkBtm)
+        # 检查复选框是否被选中
+        is_checked = await page.evaluate(
+            '(element) => element.checked', checkbox
+        )
+        # 如果未选中，则点击
+        if not is_checked:
+            await checkbox.click()
+            await page.waitFor(random.randint(1000, 2000))
+        # 检查复选框是否被选中
+        is_checked = await page.evaluate(
+            '(element) => element.checked', checkbox
+        )
+        logger.info(f"复选框是否被选中: {is_checked}")
+        # await click_and_wait(page, fxkBtm)
         await click_and_wait(page, '.btn.J_ping.btn-active')
         logger.info("完成用户名和密码输入")
 
@@ -166,9 +182,9 @@ async def get_jd_ck(usernum, passwd, headless=True):
                     return await handle_error(f"{usernum} 需要进行短信验证", browser)
             except Exception as e:
                 return await handle_error(f"{usernum} 短信验证发生错误", browser, e)
-
+            # page.waitFor(3000)
             try:
-                if await page.xpath('//*[@id="small_img"]'):
+                if await page.waitForXPath('//*[@id="small_img"]', {'timeout': 2000}):
                     await verification(page)
             except Exception as e:
                 return await handle_error(f"{usernum} 滑块验证发生错误", browser, e)
@@ -241,19 +257,7 @@ async def login(request: LoginRequest):
         response = await get_jd_ck(request.username, request.password, headless=False)
         return response
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"{request.usernum}账密登录发生异常:{e}")
-
-def login_get_jd_ck(usernum, passwd):
-    async def async_login():
-        try:
-            response = await get_jd_ck(usernum, passwd, headless=False)
-            return response
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"{usernum}账密登录发生异常:{e}")
-
-    # 在非异步方法中调用异步方法并等待其完成
-    response = asyncio.run(async_login())
-    return response
+        raise HTTPException(status_code=400, detail=f"{request.username}账密登录发生异常:{e}")
 
 
 if __name__ == '__main__':
