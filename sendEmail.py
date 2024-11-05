@@ -67,14 +67,17 @@ class sendEmail:
         #         msg.attach(image)
 
         # 创建 SMTP 连接
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            # 使用 TLS 加密连接
-            server.starttls()
-
-            # 登录发件人邮箱
-            server.login(sendEmail.username, sendEmail.password)
-
-            # 发送邮件
-            server.sendmail(sendEmail.sender_email, sendEmail.receiver_email, msg.as_string())
-
-        logger.info('发送邮件成功!')
+        try:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                # 使用 TLS 加密连接
+                server.starttls()
+    
+                # 登录发件人邮箱
+                server.login(sendEmail.username, sendEmail.password)
+    
+                # 发送邮件
+                server.sendmail(sendEmail.sender_email, sendEmail.receiver_email, msg.as_string())
+    
+            logger.info('发送邮件成功!')
+        except Exception as e:
+            print(f"发送邮件Error: {e}")
