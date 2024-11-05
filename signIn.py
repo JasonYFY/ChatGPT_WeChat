@@ -101,14 +101,14 @@ class signIn:
             for i in range(3):
                 swal = page.ele('#auth-qr-form', timeout=2)
                 if swal:
-                    
+                    time.sleep(3)
                     # 等待二维码出来
                     page.ele('tag:div@class=qr-container').ele('tag:svg')
                     logger.info('需要登录，准备截图发送')
                     image_data = page.get_screenshot(as_base64='jpg')
                     sendEmail.send('请扫码登录：', image_data)
-                    logger.info('睡眠30s')
-                    time.sleep(31)
+                    logger.info('睡眠60s')
+                    time.sleep(60)
                 else:
                     logger.info('应该登录成功了')
                     break
