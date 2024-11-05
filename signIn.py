@@ -107,8 +107,8 @@ class signIn:
                     logger.info('需要登录，准备截图发送')
                     image_data = page.get_screenshot(as_base64='jpg')
                     sendEmail.send('请扫码登录：', image_data)
-                    logger.info('睡眠60s')
-                    time.sleep(60)
+                    logger.info('睡眠30s')
+                    time.sleep(30)
                 else:
                     logger.info('应该登录成功了')
                     break
