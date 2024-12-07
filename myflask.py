@@ -16,11 +16,12 @@ from geminiAi import geminiAi
 # 导入自定义类
 from gptManage import gptMessageManage
 from jingdong import jingdong
-from jingdong_new import login_get_jd_ck
 from openAi import openAi
 from signIn import signIn
 from timerTask import timerTask
 from whiteIPManage import whiteIP
+
+import subprocess
 
 ##############################读取配置##########################
 with open('config/config.yml', 'r', encoding='utf-8') as f:
@@ -129,12 +130,16 @@ def getTokenOfOpenAi():
 
 @app.route('/getJingdongToken/', methods=['POST'])
 def getJingdongToken():
-    req = request.get_json()  # 获取JSON数据
-    username = req.get('username')
-    password = req.get('password')
     try:
-        response = login_get_jd_ck(username, password)
-        return {'status': 'success', 'data': response.msg}
+        # 调用Linux命令
+        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py"
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # 获取命令输出
+        output, error = process.communicate()
+
+        # 打印输出
+        return {'status': 'success', 'data': output}
     except Exception as e:
         message = str(e)
         logger.error('getJingdongToken接口报错：%s', e)
