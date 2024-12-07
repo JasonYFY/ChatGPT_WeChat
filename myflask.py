@@ -138,6 +138,8 @@ def getJingdongToken():
         # 获取命令输出
         output, error = process.communicate()
 
+        logger.info('命令输出output：%s，error：%s', output,error)
+
         # 将输出转换为字符串
         output_str = output.decode('utf-8')
 
