@@ -138,13 +138,15 @@ def getJingdongToken():
         # 获取命令输出
         output, error = process.communicate()
 
-        logger.info('命令输出output：%s，error：%s', output,error)
-
         # 将输出转换为字符串
         output_str = output.decode('utf-8')
+        error_str = error.decode('utf-8')
+
+
+        logger.info('命令输出output：%s，error：%s', output_str,error_str)
 
         # 返回JSON响应
-        return jsonify({'status': 'success', 'data': output_str})
+        return jsonify({'status': 'success', 'output_str': output_str,'error_str':error_str})
     except Exception as e:
         message = str(e)
         logger.error('getJingdongToken接口报错：%s', e)
