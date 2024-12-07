@@ -5,7 +5,7 @@ import json
 import time
 
 import yaml
-from flask import Flask, request, make_response,Response
+from flask import Flask, request, make_response,Response,jsonify
 from flask import abort
 from wechatpy import parse_message, create_reply, WeChatClient
 from wechatpy.replies import VoiceReply
@@ -138,8 +138,11 @@ def getJingdongToken():
         # 获取命令输出
         output, error = process.communicate()
 
-        # 打印输出
-        return {'status': 'success', 'data': output}
+        # 将输出转换为字符串
+        output_str = output.decode('utf-8')
+
+        # 返回JSON响应
+        return jsonify({'status': 'success', 'data': output_str})
     except Exception as e:
         message = str(e)
         logger.error('getJingdongToken接口报错：%s', e)
