@@ -21,5 +21,3 @@ paddleocr
 fastapi
 pyppeteer
 google-generativeai
-
-subprocess
