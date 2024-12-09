@@ -130,9 +130,11 @@ def getTokenOfOpenAi():
 
 @app.route('/getJingdongToken/', methods=['POST'])
 def getJingdongToken():
+    req = request.get_json()  # 获取JSON数据
+    username = req.get('username')
     try:
         # 调用Linux命令
-        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py"
+        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py -u "+username
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # 获取命令输出
