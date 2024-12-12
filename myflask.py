@@ -134,7 +134,7 @@ def getJingdongToken():
     username = req.get('username')
     try:
         # 调用Linux命令
-        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py -u "+username
+        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py -f "+username
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # 获取命令输出
