@@ -109,7 +109,7 @@ def wechat():
         return ''
 
 
-@app.route('/getWechat/', methods=['POST'])
+@app.route('/getWechat', methods=['POST'])
 def getTokenOfOpenAi():
     req = request.get_json()  # 获取JSON数据
     
