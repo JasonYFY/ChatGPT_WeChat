@@ -109,22 +109,17 @@ def wechat():
         return ''
 
 
-
-@app.route('/getTokenOfOpenAi/', methods=['POST'])
+@app.route('/getWechat/', methods=['POST'])
 def getTokenOfOpenAi():
     req = request.get_json()  # 获取JSON数据
-    username = req.get('username')
-    password = req.get('password')
-    type = req.get('type')
+    
     try:
-        accessToken = openAi.getAccessToken(username, password, type)
-        logger.info('获取的accessToken：%s', accessToken)
-        return {'status': 'success', 'data': accessToken}
+        logger.info('getWechat获取的信息：%s', req)
+        return {'status': 'success', 'data': '成功'}
     except Exception as e:
         message = str(e)
-        logger.error('getTokenOfOpenAi接口报错：%s', e)
+        logger.error('getWechat接口报错：%s', e)
     return {'status': 'fail', 'message': message}
-
 
 
 
