@@ -5,7 +5,7 @@ import json
 import time
 
 import yaml
-from flask import Flask, request, make_response,Response,jsonify
+from flask import Flask, request, make_response, Response, jsonify
 from flask import abort
 from wechatpy import parse_message, create_reply, WeChatClient
 from wechatpy.replies import VoiceReply
@@ -17,6 +17,7 @@ from gptManage import gptMessageManage
 from signIn import signIn
 from timerTask import timerTask
 from whiteIPManage import whiteIP
+from decimal import Decimal, ROUND_HALF_UP
 
 import subprocess
 
@@ -113,7 +114,15 @@ def getWechatCompute():
     freight = req.get('freight')
     tons = req.get('tons')
     try:
-        return {'status': 'success', 'data': freight*tons}
+        freightDec = Decimal(freight)
+        tonsDec = Decimal(tons)
+
+        # 计算结果
+        result = freightDec * tonsDec
+
+        # 四舍五入保留两位小数
+        rounded_result = result.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+        return {'status': 'success', 'data': rounded_result}
     except Exception as e:
         message = str(e)
         logger.error('getWechat接口报错：%s', e)
@@ -132,14 +141,13 @@ def getwechatRegion():
     return {'status': 'fail', 'message': message}
 
 
-
 @app.route('/getJingdongToken/', methods=['POST'])
 def getJingdongToken():
     req = request.get_json()  # 获取JSON数据
     username = req.get('username')
     try:
         # 调用Linux命令
-        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py -f "+username
+        command = "python3 /home/yifangyujason/AutoUpdateJdCookie/main.py -f " + username
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # 获取命令输出
@@ -149,11 +157,10 @@ def getJingdongToken():
         output_str = output.decode('utf-8')
         error_str = error.decode('utf-8')
 
-
-        logger.info('命令输出output：%s，error：%s', output_str,error_str)
+        logger.info('命令输出output：%s，error：%s', output_str, error_str)
 
         # 返回JSON响应
-        return jsonify({'status': 'success', 'output_str': output_str,'error_str':error_str})
+        return jsonify({'status': 'success', 'output_str': output_str, 'error_str': error_str})
     except Exception as e:
         message = str(e)
         logger.error('getJingdongToken接口报错：%s', e)
@@ -176,12 +183,14 @@ def getAnswerOfBard():
         logger.error('getAnswerOfBard接口报错：%s', e)
     return {'status': 'fail', 'msg': message}
 
+
 @app.route('/getAnswerOfGemini/', methods=['POST'])
 def getAnswerOfGemini():
     req = request.get_json()  # 获取JSON数据
     content = req.get('content')
     conversationId = req.get('conversationId')
     imageFileName = req.get('imageFileName')
+
     def stream_response():
         try:
             for chunk in geminiAi.getAnswerStream(content, conversationId, imageFileName):
@@ -194,6 +203,7 @@ def getAnswerOfGemini():
 
     return Response(stream_response(), mimetype='text/event-stream')
 
+
 @app.route('/singInOfTgHelp/', methods=['POST'])
 def singInOfTgHelp():
     req = request.get_json()  # 获取JSON数据
@@ -202,6 +212,5 @@ def singInOfTgHelp():
     return {'status': 'success'}
 
 
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',use_reloader=False)
+    app.run(host='0.0.0.0', use_reloader=False)
