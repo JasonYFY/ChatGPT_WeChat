@@ -6,6 +6,7 @@ wechat:
   # 如果上面的选项为true，下面两项内容必填；如要开启后面文本转语音服务，下面两项内容必填
   appid: "****"
   secret: "****"
+  region: ""
 
 # openai相关设置
 openai:
@@ -47,11 +48,6 @@ signIn:
   username: ''
   password: ''
 
-
-bardAi:
-  username: ''
-  password: ''
-  image_path: ''
 
 sendEmail:
   password: ''

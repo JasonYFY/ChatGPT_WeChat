@@ -107,7 +107,7 @@ def wechat():
 
 
 @app.route('/getWechat', methods=['POST'])
-def getTokenOfOpenAi():
+def getWechat():
     req = request.get_json()  # 获取JSON数据
     
     try:
@@ -116,6 +116,20 @@ def getTokenOfOpenAi():
     except Exception as e:
         message = str(e)
         logger.error('getWechat接口报错：%s', e)
+    return {'status': 'fail', 'message': message}
+
+
+@app.route('/wechat/region', methods=['GET'])
+def getwechatRegion():
+    region = configs['wechat']['region']
+
+    try:
+        # 转成json格式返回
+        regionJson = json.dumps(region)
+        return {'status': 'success', 'data': regionJson}
+    except Exception as e:
+        message = str(e)
+        logger.error('getwechatRegion接口报错：%s', e)
     return {'status': 'fail', 'message': message}
 
 
