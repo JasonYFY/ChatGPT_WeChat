@@ -47,10 +47,6 @@ signIn:
   username: ''
   password: ''
 
-newBing:
-  auth: ''
-  username: ''
-  password: ''
 
 bardAi:
   username: ''
