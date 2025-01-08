@@ -106,13 +106,14 @@ def wechat():
         return ''
 
 
-@app.route('/getWechat', methods=['POST'])
-def getWechat():
+@app.route('/wechat/compute', methods=['POST'])
+def getWechatCompute():
     req = request.get_json()  # 获取JSON数据
-    
+    logger.info('getWechatCompute获取的信息：%s', req)
+    freight = req.get('freight')
+    tons = req.get('tons')
     try:
-        logger.info('getWechat获取的信息：%s', req)
-        return {'status': 'success', 'data': '成功'}
+        return {'status': 'success', 'data': freight*tons}
     except Exception as e:
         message = str(e)
         logger.error('getWechat接口报错：%s', e)
@@ -124,9 +125,7 @@ def getwechatRegion():
     region = configs['wechat']['region']
 
     try:
-        # 转成json格式返回
-        regionJson = json.dumps(region)
-        return {'status': 'success', 'data': regionJson}
+        return {'status': 'success', 'data': region}
     except Exception as e:
         message = str(e)
         logger.error('getwechatRegion接口报错：%s', e)
