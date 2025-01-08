@@ -10,13 +10,10 @@ from flask import abort
 from wechatpy import parse_message, create_reply, WeChatClient
 from wechatpy.replies import VoiceReply
 
-from bardAi import bardAi
 from commonUtils.log import logger
 from geminiAi import geminiAi
 # 导入自定义类
 from gptManage import gptMessageManage
-from jingdong import jingdong
-from openAi import openAi
 from signIn import signIn
 from timerTask import timerTask
 from whiteIPManage import whiteIP
